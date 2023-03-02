@@ -28,6 +28,7 @@ mod ordqueue;
 use crate::ordqueue::{OrdQueue, OrdQueueIter};
 pub mod progress;
 use crate::progress::*;
+#[cfg(not(feature = "wasm"))]
 pub mod c_api;
 mod denoise;
 use crate::denoise::*;
@@ -36,13 +37,16 @@ mod encoderust;
 // #[cfg(feature = "gifsicle")]
 // mod encodegifsicle;
 
+mod thread;
 mod minipool;
+
+#[cfg(feature = "wasm")]
+pub mod wasm;
 
 use crossbeam_channel::{Receiver, Sender};
 use std::io::prelude::*;
 use std::num::NonZeroU8;
 use std::path::PathBuf;
-use std::thread;
 use std::sync::atomic::Ordering::Relaxed;
 
 
@@ -510,6 +514,8 @@ impl Writer {
     fn write_inner(mut self, writer: &mut dyn Write, reporter: &mut dyn ProgressReporter) -> CatResult<()> {
         let decode_queue_recv = self.queue_iter.take().ok_or(Error::Aborted)?;
 
+        log::info!("Starting");
+
         let settings_ext = self.settings;
         let (diff_queue, diff_queue_recv) = ordqueue::new(0);
         let resize_thread = thread::Builder::new().name("resize".into()).spawn(move || {
@@ -547,9 +553,17 @@ impl Writer {
                 let image = match frame.frame {
                     FrameSource::Pixels(image) => image,
                     FrameSource::Path(path) => {
-                        let image = lodepng::decode32_file(&path)
-                            .map_err(|err| Error::PNG(format!("Can't load {}: {err}", path.display())))?;
-                        Img::new(image.buffer, image.width, image.height)
+                        #[cfg(feature = "wasm")]
+                        {
+                            let _ = path;
+                            unimplemented!()
+                        }
+                        #[cfg(not(feature = "wasm"))]
+                        {
+                            let image = lodepng::decode32_file(&path)
+                                .map_err(|err| Error::PNG(format!("Can't load {}: {err}", path.display())))?;
+                            Img::new(image.buffer, image.width, image.height)
+                        }
                     },
                 };
                 let resized = resized_binary_alpha(image, settings.s.width, settings.s.height)?;
@@ -559,6 +573,7 @@ impl Writer {
                     frame_blurred,
                     presentation_timestamp: frame.presentation_timestamp,
                 })?;
+                log::info!("Resized frame {}", frame.frame_index);
             }
             Ok(())
         })
