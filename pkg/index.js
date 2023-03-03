@@ -39,6 +39,6 @@ for (let i = 0; i < nbFrames; i++) {
 // setTimeout(() => {
 //   encoder.close();
 // }, 3000);
-  const worker = new Worker('dist_worker.js', {credentials: 'same-origin'});
+  const worker = new Worker('dist_worker.js', { credentials: 'same-origin', name: "Main Thread" });
   worker.postMessage({frames, width, height, fps, quality})
 })()
