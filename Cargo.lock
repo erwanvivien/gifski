@@ -764,9 +764,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.17.0"
+version = "1.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f61fba1741ea2b3d6a1e3178721804bb716a68a6aeba1149b5d52e3d464ea66"
+checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
 
 [[package]]
 name = "os_str_bytes"
@@ -1067,14 +1067,12 @@ checksum = "0046fef7e28c3804e5e38bfa31ea2a0f73905319b677e57ebe37e49358989b5d"
 [[package]]
 name = "wasm_thread"
 version = "0.2.0"
+source = "git+https://github.com/erwanvivien/wasm_thread?rev=fac8113aea33201623095930ac3604b116570c15#fac8113aea33201623095930ac3604b116570c15"
 dependencies = [
  "async-channel",
- "console_error_panic_hook",
- "console_log",
- "env_logger 0.7.1",
  "futures",
  "js-sys",
- "log",
+ "once_cell",
  "wasm-bindgen",
  "web-sys",
 ]

@@ -41,7 +41,7 @@ pub fn new_scope<P, C, R>(num_threads: NonZeroU8, name: &str, waiter: P, consume
         let handles = std::iter::repeat(thread).enumerate()
             .take(num_threads.get().into())
             .map(move |(n, thread)| {
-                thread::spawn_scoped(thread::Builder::new().name(format!("minipool:{name}-{n}")), scope, thread)
+                thread::Builder::new().name(format!("minipool:{name}-{n}")).spawn_scoped(scope, thread)
             })
             .collect::<Result<Vec<_>, _>>()
             .map_err(move |_| {
