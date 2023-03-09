@@ -13,8 +13,7 @@ const init = wasm_bindgen;
 // After our first message all subsequent messages are an entry point to run,
 // so we just do that.
 self.onmessage = async (event) => {
-  const {frames, width, height, fps, quality} = event.data;
-  console.log(event.data)
+  const { frames, width, height, fps, quality } = event.data;
 
   await init();
   const encoder = new Encoder();
@@ -33,5 +32,10 @@ self.onmessage = async (event) => {
     }
   }
 
-  encoder.close();
+  const out = await encoder.close();
+
+  const blob = new Blob([out], { type: "image/gif" });
+  const url = URL.createObjectURL(blob);
+
+  console.log(url);
 };

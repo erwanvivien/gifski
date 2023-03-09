@@ -1,13 +1,12 @@
-use futures_channel::oneshot;
-use futures_channel::oneshot::Sender;
+use crate::thread;
 use crate::FromSlice;
 use crate::ImgVec;
-use crate::thread;
+use futures_channel::oneshot;
+use futures_channel::oneshot::Sender;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
 
 use std::io::Cursor;
-use web_sys::{Blob, BlobPropertyBag};
 
 use crate::{new, Collector, Settings, Writer};
 
@@ -35,7 +34,7 @@ impl crate::ProgressReporter for NoopReporter {
 #[wasm_bindgen]
 impl Encoder {
     /// This is the consumer callback. Used to write the gif.
-    fn writer_callback(writer: Writer, sender: Sender<String>) {
+    fn writer_callback(writer: Writer, sender: Sender<Vec<u8>>) {
         // Arc<(Mutex<bool>, Condvar)>) {
         #[cfg(debug_assertions)]
         log::info!("[CONSUMER] started");
@@ -51,22 +50,7 @@ impl Encoder {
         // Convert the buffer into a Blob to retrieve the URL on JavaScript side
         let gif = buffer.into_inner();
 
-        let uint8arr = js_sys::Uint8Array::new(&unsafe { js_sys::Uint8Array::view(&gif) }.into());
-        let array = js_sys::Array::new();
-        array.push(&uint8arr);
-        let blob = Blob::new_with_blob_sequence_and_options(
-            &array,
-            BlobPropertyBag::new().type_("image/gif"),
-        )
-        .unwrap();
-        let download_url = web_sys::Url::create_object_url_with_blob(&blob).unwrap();
-
-        #[cfg(debug_assertions)]
-        log::info!("Done writing gif. GIF size: {}o", gif.len());
-        #[cfg(debug_assertions)]
-        log::info!("Download URL: {}", &download_url);
-
-        sender.send(download_url).unwrap();
+        sender.send(gif).unwrap();
     }
 
     /// Creates a new `Encoder` which immediately creates a consumer Worker.
@@ -87,13 +71,20 @@ impl Encoder {
 
         let (collector, writer) = new(Settings::default()).unwrap();
 
-        let (sender, receiver) = oneshot::channel();
-        let consumer = thread::Builder::new().name(String::from("consumer")).spawn(move || Self::writer_callback(writer, sender)).unwrap();
+        let (sender, receiver) = oneshot::channel::<Vec<u8>>();
+        let consumer = thread::Builder::new()
+            // .name(String::from("consumer"))
+            .spawn(move || Self::writer_callback(writer, sender))
+            .unwrap();
 
         // Create a promise that will be resolved when the consumer is done
         let done = async move {
             match receiver.await {
-                Ok(data) => Ok(JsValue::from_str(&data)),
+                Ok(data) => {
+                    let view = unsafe { js_sys::Uint8Array::view(&data) };
+                    let uint8arr = js_sys::Uint8Array::new(&view.into());
+                    Ok(JsValue::from(uint8arr))
+                }
                 Err(_) => Err(JsValue::undefined()),
             }
         };

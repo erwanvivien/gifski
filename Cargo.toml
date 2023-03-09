@@ -59,9 +59,6 @@ web-sys = { version = "0.3", optional = true, features = [
     "MessageEvent",
     "ErrorEvent",
     "Event",
-    "Blob",
-    "BlobPropertyBag",
-    "Url",
 ] }
 futures-channel = { version = "0.3.26", optional = true }
 

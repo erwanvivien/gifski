@@ -20,6 +20,12 @@ body.appendChild(canvas);
 const frames = [];
 for (let i = 0; i < nbFrames; i++) {
   const ctx = canvas.getContext("2d");
+  // Background is stripes of red, green, blue
+  for (let j = 0; j < 3; j++) {
+    ctx.fillStyle = ["#f86f6f", "#fe9393", "#ff35c2"][j];
+    ctx.fillRect(j * width / 3, 0, width / 3, height);
+  }
+
   ctx.fillStyle = ["red", "green", "blue"][i % 3];
   ctx.fillRect(100 + i * 2, 100 + i * 2, 100, 100);
   const data = ctx.getImageData(0, 0, width, height).data.buffer;
