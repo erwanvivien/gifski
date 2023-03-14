@@ -49,7 +49,8 @@ scopeguard = "1.1.0"
 
 # Wasm dependencies
 # TODO: use wasm_thread once [13](https://github.com/chemicstry/wasm_thread/pull/13) is merged
-wasm_thread = { git = "https://github.com/erwanvivien/wasm_thread", rev = "fac8113aea33201623095930ac3604b116570c15", optional = true }
+# wasm_thread = { git = "https://github.com/chemicstry/wasm_thread", rev = "0751fa26ea9eb13d43a6a825d0a4edb75e3d6366", optional = true, default-features = false }
+wasm_thread = { git = "https://github.com/chemicstry/wasm_thread", rev = "dc0bb62f520ca5af9e3d69e4e8f9a260e36ac777", optional = true, default-features = false }
 wasm-bindgen = { version = "0.2", optional = true }
 wasm-bindgen-futures = { version = "0.4.34", optional = true }
 js-sys = { version = "0.3", optional = true }

@@ -59,10 +59,11 @@ impl Encoder {
     /// Once `close` is called, the consumer will be stopped and will collect into a GIF.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
-        wasm_thread::set_worker_prefix(String::from("GIFSKI"));
-        wasm_thread::set_wasm_bindgen_shim_script_path(String::from(
-            "http://localhost:3000/gifski.js",
-        ));
+        #[cfg(feature = "wasm")]
+        thread::Builder::new()
+            .prefix(String::from("GIFSKI"))
+            .wasm_bindgen_shim_url(String::from("http://localhost:3000/gifski.js"))
+            .set_default();
 
         #[cfg(debug_assertions)]
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));

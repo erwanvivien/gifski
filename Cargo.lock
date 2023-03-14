@@ -1038,12 +1038,11 @@ checksum = "0046fef7e28c3804e5e38bfa31ea2a0f73905319b677e57ebe37e49358989b5d"
 [[package]]
 name = "wasm_thread"
 version = "0.2.0"
-source = "git+https://github.com/erwanvivien/wasm_thread?rev=fac8113aea33201623095930ac3604b116570c15#fac8113aea33201623095930ac3604b116570c15"
+source = "git+https://github.com/chemicstry/wasm_thread?rev=dc0bb62f520ca5af9e3d69e4e8f9a260e36ac777#dc0bb62f520ca5af9e3d69e4e8f9a260e36ac777"
 dependencies = [
  "async-channel",
  "futures",
  "js-sys",
- "once_cell",
  "wasm-bindgen",
  "web-sys",
 ]
